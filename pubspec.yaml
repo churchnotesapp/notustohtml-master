@@ -9,9 +9,9 @@ environment:
 dependencies:
   notus:
     git:
-      url: git://github.com/BoomeranggSoftware/zefyr.git
+      url: git://github.com/churchnotesapp/zefyr-master.git
       path: packages/notus/
-      ref: 8a63ec9
+      ref: bdcf3b824d7205aa3f6dce5c6d00a55a8495201c
   quill_delta: ^1.0.2
   html: ^0.14.0
 
