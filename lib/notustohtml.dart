@@ -350,21 +350,20 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
         var next;
         if (index + 1 < element.nodes.length) next = element.nodes[index + 1];
         delta = _parseNode(node, delta, next,
-            isNewLine: element.localName == "li" || element.localName == "p" || element.localName == "div", inBlock: blockAttributes);
+            isNewLine: element.localName != "li" && (element.localName == "p" || element.localName == "div"), inBlock: blockAttributes);
       });
-      if (inBlock == null) {
-        delta..insert("\n");
-      }
       return delta;
     } else if (type == "embed") {
       NotusDocument tempdocument;
       if (element.localName == "img") {
+        delta..insert("\n");
         tempdocument = NotusDocument.fromDelta(delta);
         var index = tempdocument.length;
         tempdocument.format(index - 1, 0,
             NotusAttribute.embed.image(element.attributes["src"]));
       }
       if (element.localName == "hr") {
+        delta..insert("\n");
         tempdocument = NotusDocument.fromDelta(delta);
         var index = tempdocument.length;
         tempdocument.format(index - 1, 0, NotusAttribute.embed.horizontalRule);
