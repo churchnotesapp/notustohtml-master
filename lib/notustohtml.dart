@@ -359,14 +359,12 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
     } else if (type == "embed") {
       NotusDocument tempdocument;
       if (element.localName == "img") {
-        delta..insert("\n");
         tempdocument = NotusDocument.fromDelta(delta);
         var index = tempdocument.length;
         tempdocument.format(index - 1, 0,
             NotusAttribute.embed.image(element.attributes["src"]));
       }
       if (element.localName == "hr") {
-        delta..insert("\n");
         tempdocument = NotusDocument.fromDelta(delta);
         var index = tempdocument.length;
         tempdocument.format(index - 1, 0, NotusAttribute.embed.horizontalRule);
