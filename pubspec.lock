@@ -187,9 +187,9 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/notus/"
-      ref: "8a63ec9"
-      resolved-ref: "8a63ec9a8629208109b4b277e3d53d0a94733261"
-      url: "git://github.com/BoomeranggSoftware/zefyr.git"
+      ref: bdcf3b824d7205aa3f6dce5c6d00a55a8495201c
+      resolved-ref: bdcf3b824d7205aa3f6dce5c6d00a55a8495201c
+      url: "git://github.com/churchnotesapp/zefyr-master.git"
     source: git
     version: "0.1.5"
   package_config:
