@@ -279,6 +279,7 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
     if (node.runtimeType == Element) {
       Element element = node;
       if (element.localName == "ul") {
+        delta = delta..insert("\n");
         element.children.forEach((child) {
           delta = _parseElement(
               child, delta, _supportedElements[child.localName],
@@ -287,6 +288,7 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
         });
       }
       if (element.localName == "ol") {
+        delta = delta..insert("\n");
         element.children.forEach((child) {
           delta = _parseElement(
               child, delta, _supportedElements[child.localName],
@@ -309,6 +311,9 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
         delta..insert(text.text + "\n");
       } else {
         delta..insert(text.text);
+      }
+      if (inBlock != null) {
+        delta..insert("\n", inBlock);
       }
       return delta;
     }
