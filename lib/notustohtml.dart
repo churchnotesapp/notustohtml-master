@@ -267,7 +267,7 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
     html.body.nodes.asMap().forEach((index, node) {
       var next;
       if (index + 1 < html.body.nodes.length) next = html.body.nodes[index + 1];
-      delta = _parseNode(node, delta, next);
+      delta = _parseNode(node, delta, next, isNewLine: delta.isEmpty || delta.last.data.endsWith("\n"));
     });
     if (delta.last.data.endsWith("\n")) {
       return delta;
@@ -279,7 +279,9 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
     if (node.runtimeType == Element) {
       Element element = node;
       if (element.localName == "ul") {
-        delta = delta..insert("\n");
+        if (isNewLine != true) {
+          delta = delta..insert("\n");
+        }
         element.children.forEach((child) {
           delta = _parseElement(
               child, delta, _supportedElements[child.localName],
@@ -288,7 +290,9 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
         });
       }
       if (element.localName == "ol") {
-        delta = delta..insert("\n");
+        if (isNewLine != true) {
+          delta = delta..insert("\n");
+        }
         element.children.forEach((child) {
           delta = _parseElement(
               child, delta, _supportedElements[child.localName],
@@ -311,9 +315,6 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
         delta..insert(text.text + "\n");
       } else {
         delta..insert(text.text);
-      }
-      if (inBlock != null) {
-        delta..insert("\n", inBlock);
       }
       return delta;
     }
@@ -350,8 +351,15 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
         var next;
         if (index + 1 < element.nodes.length) next = element.nodes[index + 1];
         delta = _parseNode(node, delta, next,
-            isNewLine: element.localName != "li" && (element.localName == "p" || element.localName == "div"), inBlock: blockAttributes);
+            isNewLine: element.localName == "li" && (element.localName == "p" || element.localName == "div"), inBlock: blockAttributes);
       });
+      if (blockAttributes.isNotEmpty) {
+        delta..insert("\n", blockAttributes);
+      }
+
+      if (inBlock == null && element.localName != "li") {
+        delta..insert("\n");
+      }
       return delta;
     } else if (type == "embed") {
       NotusDocument tempdocument;
