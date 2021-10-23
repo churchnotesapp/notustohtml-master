@@ -13,7 +13,7 @@ dependencies:
       path: packages/notus/
       ref: bdcf3b824d7205aa3f6dce5c6d00a55a8495201c
   quill_delta: ^1.0.2
-  html: ^0.14.0
+  html: ^0.15.0
 
 dev_dependencies:
   test: ^1.18.2
