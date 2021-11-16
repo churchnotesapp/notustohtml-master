@@ -11,7 +11,8 @@ dependencies:
     git:
       url: git://github.com/churchnotesapp/zefyr-master.git
       path: packages/notus/
-      ref: bdcf3b824d7205aa3f6dce5c6d00a55a8495201c
+      ref: 02b150b3d7f24b25095f4acc8b4aba3d539bdf49
+      #bdcf3b824d7205aa3f6dce5c6d00a55a8495201c
   quill_delta: ^1.0.2
   html: ^0.14.0
 
