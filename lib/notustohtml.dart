@@ -282,23 +282,25 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
         if (isNewLine != true) {
           delta = delta..insert("\n");
         }
-        element.children.forEach((child) {
+        for (int i = 0; i < element.children.length; i++) {
+          var child = element.children[i];
           delta = _parseElement(
               child, delta, _supportedElements[child.localName!],
               listType: "ul", next: next, isNewLine: isNewLine, inBlock: inBlock);
           return delta;
-        });
+        }
       }
       if (element.localName == "ol") {
         if (isNewLine != true) {
           delta = delta..insert("\n");
         }
-        element.children.forEach((child) {
+        for (int i = 0; i < element.children.length; i++) {
+          var child = element.children[i];
           delta = _parseElement(
               child, delta, _supportedElements[child.localName!],
               listType: "ol", next: next, isNewLine: isNewLine, inBlock: inBlock);
           return delta;
-        });
+        }
       }
       if (_supportedElements[element.localName!] == null) {
         return delta;
