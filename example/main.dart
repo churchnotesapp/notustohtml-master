@@ -8,7 +8,7 @@ void main() {
   // Replace with the document you have take from the Zefyr editor
   final doc = "Test<ol><li>TTT</li><li>TSS</li></ol><ul><li>Fvjhggugigiy<strong>Test</strong><u>Test Underline</u></li></ul>TTT<strong>TEST</strong><br><br>";
 
-  var html = converter.decode(doc);
+  Delta html = converter.decode(doc);
   print(html); // The HTML representation of the Notus document
 
   print(NotusDocument.fromDelta(html));

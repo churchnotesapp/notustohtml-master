@@ -32,11 +32,11 @@ class _NotusHtmlEncoder extends Converter<Delta, String> {
     final iterator = DeltaIterator(input);
     final buffer = StringBuffer();
     final lineBuffer = StringBuffer();
-    NotusAttribute<String> currentBlockStyle;
+    NotusAttribute<String?>? currentBlockStyle;
     var currentInlineStyle = NotusStyle();
     var currentBlockLines = [];
 
-    void _handleBlock(NotusAttribute<String> blockStyle) {
+    void _handleBlock(NotusAttribute<String?>? blockStyle) {
       if (currentBlockLines.isEmpty) {
         return; // Empty block
       }
@@ -72,15 +72,15 @@ class _NotusHtmlEncoder extends Converter<Delta, String> {
       buffer.writeln();
     }
 
-    void _handleSpan(String text, Map<String, dynamic> attributes) {
+    void _handleSpan(String text, Map<String, dynamic>? attributes) {
       final style = NotusStyle.fromJson(attributes);
       currentInlineStyle =
           _writeInline(lineBuffer, text, style, currentInlineStyle);
     }
 
-    void _handleLine(Map<String, dynamic> attributes) {
+    void _handleLine(Map<String, dynamic>? attributes) {
       final style = NotusStyle.fromJson(attributes);
-      final lineBlock = style.get(NotusAttribute.block);
+      final lineBlock = style.get(NotusAttribute.block as NotusAttributeKey<String>);
       if (lineBlock == currentBlockStyle) {
         currentBlockLines.add(_writeLine(lineBuffer.toString(), style));
       } else {
@@ -128,13 +128,13 @@ class _NotusHtmlEncoder extends Converter<Delta, String> {
     var buffer = StringBuffer();
     // Open heading
     if (style.contains(NotusAttribute.heading)) {
-      _writeAttribute(buffer, style.get<int>(NotusAttribute.heading));
+      _writeAttribute(buffer, style.get<int?>(NotusAttribute.heading));
     }
     // Write the text itself
     buffer.write(text);
     // Close the heading
     if (style.contains(NotusAttribute.heading)) {
-      _writeAttribute(buffer, style.get<int>(NotusAttribute.heading),
+      _writeAttribute(buffer, style.get<int?>(NotusAttribute.heading),
           close: true);
     }
     return buffer.toString();
@@ -151,7 +151,7 @@ class _NotusHtmlEncoder extends Converter<Delta, String> {
 
   NotusStyle _writeInline(StringBuffer buffer, String text, NotusStyle style,
       NotusStyle currentStyle) {
-    NotusAttribute wasA;
+    NotusAttribute? wasA;
     // First close any current styles if needed
     for (var value in currentStyle.values) {
       if (value.scope == NotusAttributeScope.line) continue;
@@ -182,7 +182,7 @@ class _NotusHtmlEncoder extends Converter<Delta, String> {
     return style;
   }
 
-  void _writeAttribute(StringBuffer buffer, NotusAttribute attribute,
+  void _writeAttribute(StringBuffer buffer, NotusAttribute? attribute,
       {bool close = false}) {
     if (attribute == NotusAttribute.bold) {
       _writeBoldTag(buffer, close: close);
@@ -190,14 +190,14 @@ class _NotusHtmlEncoder extends Converter<Delta, String> {
       _writeUnderlineTag(buffer, close: close);
     } else if (attribute == NotusAttribute.italic) {
       _writeItalicTag(buffer, close: close);
-    } else if (attribute.key == NotusAttribute.link.key) {
-      _writeLinkTag(buffer, attribute as NotusAttribute<String>, close: close);
+    } else if (attribute!.key == NotusAttribute.link.key) {
+      _writeLinkTag(buffer, attribute as NotusAttribute<String?>?, close: close);
     } else if (attribute.key == NotusAttribute.heading.key) {
-      _writeHeadingTag(buffer, attribute as NotusAttribute<int>, close: close);
+      _writeHeadingTag(buffer, attribute as NotusAttribute<int?>, close: close);
     } else if (attribute.key == NotusAttribute.block.key) {
-      _writeBlockTag(buffer, attribute as NotusAttribute<String>, close: close);
+      _writeBlockTag(buffer, attribute as NotusAttribute<String?>?, close: close);
     } else if (attribute.key == NotusAttribute.embed.key) {
-      _writeEmbedTag(buffer, attribute as EmbedAttribute, close: close);
+      _writeEmbedTag(buffer, attribute as EmbedAttribute?, close: close);
     } else {
       throw ArgumentError('Cannot handle $attribute');
     }
@@ -215,22 +215,22 @@ class _NotusHtmlEncoder extends Converter<Delta, String> {
     buffer.write(!close ? "<$kItalic>" : "</$kItalic>");
   }
 
-  void _writeLinkTag(StringBuffer buffer, NotusAttribute<String> link,
+  void _writeLinkTag(StringBuffer buffer, NotusAttribute<String?>? link,
       {bool close = false}) {
     if (close) {
       buffer.write('</a>');
     } else {
-      buffer.write('<a href="${link.value}">');
+      buffer.write('<a href="${link!.value}">');
     }
   }
 
-  void _writeHeadingTag(StringBuffer buffer, NotusAttribute<int> heading,
+  void _writeHeadingTag(StringBuffer buffer, NotusAttribute<int?> heading,
       {bool close = false}) {
     var level = heading.value;
     buffer.write(!close ? "<h$level>" : "</h$level>");
   }
 
-  void _writeBlockTag(StringBuffer buffer, NotusAttribute<String> block,
+  void _writeBlockTag(StringBuffer buffer, NotusAttribute<String?>? block,
       {bool close = false}) {
     if (block == NotusAttribute.code) {
       if (!close) {
@@ -240,20 +240,20 @@ class _NotusHtmlEncoder extends Converter<Delta, String> {
       }
     } else {
       if (!close) {
-        buffer.write('<${kSimpleBlocks[block]}>');
+        buffer.write('<${kSimpleBlocks[block!]}>');
       } else {
-        buffer.write('</${kSimpleBlocks[block]}>');
+        buffer.write('</${kSimpleBlocks[block!]}>');
       }
     }
   }
 
-  void _writeEmbedTag(StringBuffer buffer, EmbedAttribute embed,
+  void _writeEmbedTag(StringBuffer buffer, EmbedAttribute? embed,
       {bool close = false}) {
     if (close) return;
-    if (embed.type == EmbedType.horizontalRule) {
+    if (embed!.type == EmbedType.horizontalRule) {
       buffer.write("<hr>");
     } else if (embed.type == EmbedType.image) {
-      buffer.write('<img src="${embed.value["source"]}">');
+      buffer.write('<img src="${embed.value!["source"]}">');
     }
   }
 }
@@ -264,9 +264,9 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
     Delta delta = Delta();
     Document html = parse(input);
 
-    html.body.nodes.asMap().forEach((index, node) {
+    html.body!.nodes.asMap().forEach((index, node) {
       var next;
-      if (index + 1 < html.body.nodes.length) next = html.body.nodes[index + 1];
+      if (index + 1 < html.body!.nodes.length) next = html.body!.nodes[index + 1];
       delta = _parseNode(node, delta, next, isNewLine: delta.isEmpty || (delta.last.data as String).endsWith("\n"));
     });
     if ((delta.last.data as String).endsWith("\n")) {
@@ -284,7 +284,7 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
         }
         element.children.forEach((child) {
           delta = _parseElement(
-              child, delta, _supportedElements[child.localName],
+              child, delta, _supportedElements[child.localName!],
               listType: "ul", next: next, isNewLine: isNewLine, inBlock: inBlock);
           return delta;
         });
@@ -295,16 +295,16 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
         }
         element.children.forEach((child) {
           delta = _parseElement(
-              child, delta, _supportedElements[child.localName],
+              child, delta, _supportedElements[child.localName!],
               listType: "ol", next: next, isNewLine: isNewLine, inBlock: inBlock);
           return delta;
         });
       }
-      if (_supportedElements[element.localName] == null) {
+      if (_supportedElements[element.localName!] == null) {
         return delta;
       }
       delta = _parseElement(
-          element, delta, _supportedElements[element.localName],
+          element, delta, _supportedElements[element.localName!],
           next: next, isNewLine: isNewLine, inBlock: inBlock);
       return delta;
     } else {
@@ -320,9 +320,9 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
     }
   }
 
-  Delta _parseElement(Element element, Delta delta, String type,
-      {Map<String, dynamic> attributes,
-      String listType,
+  Delta _parseElement(Element element, Delta delta, String? type,
+      {Map<String, dynamic>? attributes,
+      String? listType,
       next,
       isNewLine,
       inBlock}) {
@@ -362,13 +362,13 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
       }
       return delta;
     } else if (type == "embed") {
-      NotusDocument tempdocument;
+      late NotusDocument tempdocument;
       if (element.localName == "img") {
         delta..insert("\n");
         tempdocument = NotusDocument.fromDelta(delta);
         var index = tempdocument.length;
         tempdocument.format(index - 1, 0,
-            NotusAttribute.embed.image(element.attributes["src"]));
+            NotusAttribute.embed.image(element.attributes["src"]!));
       }
       if (element.localName == "hr") {
         delta..insert("\n");
@@ -408,7 +408,7 @@ class _NotusHtmlDecoder extends Converter<String, Delta> {
       } else {
         element.nodes.forEach((node) {
           if (node.runtimeType == Element) {
-            var elementType = _supportedElements[(node as Element).localName];
+            var elementType = _supportedElements[(node as Element).localName!];
             if (elementType == null) {
               return;
             }
